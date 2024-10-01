@@ -1,4 +1,3 @@
-# server.py
 import asyncio
 import websockets
 import numpy as np
@@ -9,8 +8,12 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Load Whisper model
-model = whisper.load_model("large")
+# Check if CUDA is available and set the device accordingly
+device = "cuda" if torch.cuda.is_available() else "cpu"
+logging.info(f"Using device: {device}")
+
+# Load Whisper model on the selected device
+model = whisper.load_model("large", device=device)
 
 async def audio_handler(websocket, path):
     logging.info("Client connected.")
@@ -46,8 +49,11 @@ async def audio_handler(websocket, path):
         logging.info("Client disconnected.")
 
 def transcribe_chunk(audio_float32):
+    # Adjust fp16 parameter based on the device
+    fp16 = device == "cuda"
+
     # Perform transcription
-    result = model.transcribe(audio_float32, fp16=False, language='en')
+    result = model.transcribe(audio_float32, fp16=fp16, language='en')
     logging.info(f"Transcription result: {result}")
     return result['text']
 
