@@ -118,7 +118,7 @@ def transcribe_chunk(audio_float32):
     return result.text
 
 async def main():
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 8900))
     async with websockets.serve(audio_handler, "localhost", port, max_size=2**25):
         logging.info("Server started.")
         await asyncio.Future()  # Run forever
