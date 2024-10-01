@@ -3,3 +3,5 @@ whisper
 websockets
 numpy
 torch
+scipy
+git+https://github.com/snakers4/silero-vad.git

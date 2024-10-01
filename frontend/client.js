@@ -16,7 +16,7 @@ function startTranscription() {
   stopButton.disabled = false;
 
   // Initialize WebSocket connection to the server
-  socket = new WebSocket('ws://localhost:8000/ws/audio');
+  socket = new WebSocket('ws://192.168.2.30:8900/ws/audio');
 
   socket.onopen = function() {
     console.log('WebSocket connection established.');
