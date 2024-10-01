@@ -30,11 +30,14 @@ decoding_options = whisper.DecodingOptions(
     without_timestamps=True,
 )
 
-# Load Silero VAD model
-vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                                  model='silero_vad',
-                                  force_reload=False,
-                                  onnx=False)
+# Load Silero VAD model on CPU
+vad_model, utils = torch.hub.load(
+    repo_or_dir='snakers4/silero-vad',
+    model='silero_vad',
+    force_reload=False,
+    onnx=False,
+    verbose=False
+)
 (get_speech_timestamps, _, _, _, _) = utils
 
 # Lock for thread-safe model inference
@@ -89,13 +92,12 @@ async def audio_handler(websocket, path):
 
 def vad(audio_float32):
     # Resample audio to 16000 Hz if necessary
-    if audio_float32.shape[0] != 16000:
-        audio_float32 = resample(audio_float32, int(len(audio_float32) * 16000 / 16000))
+    # (Assuming the input is already at 16 kHz; otherwise, include resampling code)
 
-    # Convert to torch tensor
-    audio_tensor = torch.from_numpy(audio_float32).to(device)
+    # Convert to torch tensor and ensure it's on CPU
+    audio_tensor = torch.from_numpy(audio_float32)
 
-    # Apply VAD model
+    # Apply VAD model on CPU
     with torch.no_grad():
         speech_timestamps = get_speech_timestamps(
             audio_tensor, vad_model, sampling_rate=16000
@@ -104,7 +106,7 @@ def vad(audio_float32):
     return speech_timestamps
 
 def transcribe_chunk(audio_float32):
-    # Convert numpy array to torch tensor
+    # Convert numpy array to torch tensor and move to the appropriate device
     audio_tensor = torch.from_numpy(audio_float32).to(device)
 
     # Compute the mel spectrogram
@@ -118,7 +120,7 @@ def transcribe_chunk(audio_float32):
     return result.text
 
 async def main():
-    port = int(os.getenv("PORT", 8900))
+    port = int(os.getenv("PORT", 8000))
     async with websockets.serve(audio_handler, "localhost", port, max_size=2**25):
         logging.info("Server started.")
         await asyncio.Future()  # Run forever
