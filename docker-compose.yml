@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8901:8000"
+    environment:
+      - NAME=World
+    volumes:
+      - .:/app
