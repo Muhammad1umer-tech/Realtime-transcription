@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Activity Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #status {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        #transcription {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+        #startButton, #stopButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Voice Activity Detection Example</h1>
+    <div id="status">Status: Waiting for input...</div>
+    <div id="transcription"></div>
+    <button id="startButton">Start Listening</button>
+    <button id="stopButton" disabled>Stop Listening</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script>
+    <script>
+        // Start Listening Button
+        document.getElementById('startButton').addEventListener('click', startListening);
+        // Stop Listening Button
+        document.getElementById('stopButton').addEventListener('click', stopListening);  
+
+
+        async function startListening() {
+            // Disable the start button and enable the stop button
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('stopButton').disabled = false;
+            const myvad = await vad.MicVAD.new({
+            onSpeechStart: () => {
+              document.getElementById('status').innerText = "Status: User is speaking...";
+            },
+            onSpeechEnd: (audio) => {
+              document.getElementById('status').innerText = "Status: User stopped speaking...";
+              // do something with `audio` (Float32Array of audio samples at sample rate 16000)...
+            }
+          })
+        myvad.start()
+        }
+    </script>
+  
+</body>
+</html>
